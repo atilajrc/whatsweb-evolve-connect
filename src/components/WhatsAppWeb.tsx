@@ -28,7 +28,7 @@ interface Message {
   status: 'sent' | 'delivered' | 'read';
 }
 
-interface EvolutionApiConfig {
+interface ApiConfig {
   baseUrl: string;
   apiKey: string;
   instanceName: string;
@@ -40,7 +40,7 @@ const WhatsAppWeb = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
-  const [evolutionConfig, setEvolutionConfig] = useState<EvolutionApiConfig | null>(null);
+  const [evolutionConfig, setEvolutionConfig] = useState<ApiConfig | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -102,7 +102,7 @@ const WhatsAppWeb = () => {
     },
   ]);
 
-  const handleConfigSaved = (config: EvolutionApiConfig) => {
+  const handleConfigSaved = (config: ApiConfig) => {
     setEvolutionConfig(config);
     setIsConnected(true);
     setIsConfigOpen(false);
