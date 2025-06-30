@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, MoreVertical, MessageCircle, Users, Archive, Star, Settings, LogOut, Send, Paperclip, Smile, Mic, Phone, Video, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import EvolutionApiConfig from './EvolutionApiConfig';
 
 interface Contact {
   id: string;
@@ -27,14 +28,32 @@ interface Message {
   status: 'sent' | 'delivered' | 'read';
 }
 
+interface EvolutionApiConfig {
+  baseUrl: string;
+  apiKey: string;
+  instanceName: string;
+}
+
 const WhatsAppWeb = () => {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [evolutionConfig, setEvolutionConfig] = useState<EvolutionApiConfig | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Mock data for contacts
+  // Verificar se há configuração salva ao carregar
+  useEffect(() => {
+    const savedConfig = localStorage.getItem('evolutionApiConfig');
+    if (savedConfig) {
+      setEvolutionConfig(JSON.parse(savedConfig));
+      setIsConnected(true);
+    }
+  }, []);
+
+  // Mock data para contatos - mantém os dados existentes
   const [contacts] = useState<Contact[]>([
     {
       id: '1',
@@ -83,7 +102,13 @@ const WhatsAppWeb = () => {
     },
   ]);
 
-  // Mock messages for selected contact
+  const handleConfigSaved = (config: EvolutionApiConfig) => {
+    setEvolutionConfig(config);
+    setIsConnected(true);
+    setIsConfigOpen(false);
+  };
+
+  // Mock messages para o contato selecionado
   useEffect(() => {
     if (selectedContact) {
       const mockMessages: Message[] = [
@@ -170,6 +195,19 @@ const WhatsAppWeb = () => {
               <Button variant="ghost" size="sm">
                 <MessageCircle className="h-5 w-5" />
               </Button>
+              <Dialog open={isConfigOpen} onOpenChange={setIsConfigOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Settings className="h-5 w-5" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <EvolutionApiConfig 
+                    onConfigSaved={handleConfigSaved}
+                    isConnected={isConnected}
+                  />
+                </DialogContent>
+              </Dialog>
               <Button variant="ghost" size="sm">
                 <MoreVertical className="h-5 w-5" />
               </Button>
@@ -362,7 +400,7 @@ const WhatsAppWeb = () => {
               Selecione uma conversa para começar a trocar mensagens
             </p>
             <p className="text-sm text-slate-400 dark:text-slate-600 mt-4">
-              Preparado para integração com Evolution API
+              {isConnected ? 'Conectado com Evolution API' : 'Configure a Evolution API no ícone de configurações'}
             </p>
           </div>
         </div>
